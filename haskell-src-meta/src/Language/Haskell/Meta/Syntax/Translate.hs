@@ -222,7 +222,11 @@ instance ToPat (Exts.Pat l) where
     TH.DoublePrimL r'' -> TH.DoublePrimL (negate r'')
     _                  -> nonsense "toPat" "negating wrong kind of literal" l
   toPat (Exts.PInfixApp _ p n q) = TH.UInfixP (toPat p) (toName n) (toPat q)
+#if MIN_VERSION_template_haskell(2,18,0)
+  toPat (Exts.PApp _ n ps) = TH.ConP (toName n) [] (fmap toPat ps)
+#else
   toPat (Exts.PApp _ n ps) = TH.ConP (toName n) (fmap toPat ps)
+#endif
   toPat (Exts.PTuple _ Exts.Boxed ps) = TH.TupP (fmap toPat ps)
   toPat (Exts.PTuple _ Exts.Unboxed ps) = TH.UnboxedTupP (fmap toPat ps)
   toPat (Exts.PList _ ps) = TH.ListP (fmap toPat ps)
